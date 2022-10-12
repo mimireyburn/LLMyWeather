@@ -1,4 +1,6 @@
 from PIL import Image, ImageDraw, ImageFont
+from inky import InkyWHAT
+import time
 
 class Visualise(object): 
     
