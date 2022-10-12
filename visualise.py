@@ -11,7 +11,7 @@ class Visualise(object):
         for statement in weather_statements: 
             message = message + " \n " + str(statement)
 
-        font = ImageFont.truetype("/Library/fonts/Arial.ttf", size=20)
+        font = ImageFont.truetype("AtkinsonHyperlegible-Regular.ttf", size=20)
 
         img = Image.new('RGB', (self.width, self.height), color='white')
         
