@@ -31,7 +31,7 @@ class Visualise(object):
         inky_display = InkyWHAT(colour)
         inky_display.set_border(inky_display.WHITE)
         # convert image 
-        img = Image.open("/home/pi/weather.png")
+        img = Image.open("/home/pi/WTHR/weather.png")
 
         pal_img = Image.new("P", (1, 1))
         pal_img.putpalette((255, 255, 255, 0, 0, 0, 255, 0, 0) + (0, 0, 0) * 252)
