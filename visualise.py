@@ -27,8 +27,9 @@ class Visualise(object):
 
         img.save('weather.png')
     
-    def display(self):
-
+    def display(self, colour):
+        inky_display = InkyWHAT(colour)
+        inky_display.set_border(inky_display.WHITE)
         # convert image 
         img = Image.open("/home/pi/weather.png")
 
