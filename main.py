@@ -20,6 +20,6 @@ if __name__ == "__main__":
     while True:
         data = weather.update()
         visualise.draw(data)
-        visualise.display(colour)
+        # visualise.display(colour)
         # Update every 5 mins
         time.sleep(300)

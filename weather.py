@@ -7,7 +7,6 @@ class Weather(object):
         self.key = key
         self.location = location
 
-
     def update(self):
         descr = {
             0 : "not",
@@ -61,6 +60,40 @@ class Weather(object):
             "1260": "late evening"
         }
 
+        weather_code = { 
+            "0" : ["Clear night", 0 ],
+            "1" : ["Sunny day", 0],
+            "2" : ["Partly cloudy (night)",  0 ],
+            "3" : ["Partly cloudy (day)",  0 ],
+            "4" : ["Not used", 0 ],
+            "5" : ["Mist", 0],
+            "6" : ["Fog", 0],
+            "7" : ["Cloudy", 0 ],
+            "8" : ["Overcast", 0],
+            "9" : ["Light rain shower (night)", 0.5],
+            "10": ["Light rain shower (day)", 0.5],
+            "11": ["Drizzle", 0.5],
+            "12": ["Light rain", 0.5],
+            "13": ["Heavy rain shower (night)", 1],
+            "14": ["Heavy rain shower (day)", 1],
+            "15": ["Heavy rain", 1],
+            "16": ["Sleet shower (night)", 2],
+            "17": ["Sleet shower (day)", 2],
+            "18": ["Sleet", 2],
+            "19": ["Hail shower (night)", 2],
+            "20": ["Hail shower (day)", 2],
+            "21": ["Hail", 2],
+            "22": ["Light snow shower (night)", 100],
+            "23": ["Light snow shower (day)", 100],
+            "24": ["Light snow", 100],
+            "25": ["Heavy snow shower (night)", 100],
+            "26": ["Heavy snow shower (day)", 100],
+            "27": ["Heavy snow", 100],
+            "28": ["Thunder shower (night)", 2],
+            "29": ["Thunder shower (day)", 2],
+            "30": ["Thunder", 2]
+        }
+
         data = requests.get("http://datapoint.metoffice.gov.uk/public/data/val/wxfcs/all/json/" + self.location + "?res=3hourly&key=" + self.key).text
         data = json.loads(data)
 
@@ -73,6 +106,8 @@ class Weather(object):
             for weather_type in mydict.keys():
                 id = mydict[weather_type]["ID"]
                 val = int(window[id])
+
+                print()
                     
                 zero_impact = mydict[weather_type]["zero_impact"]
                 maximum_impact = mydict[weather_type]["maximum_impact"]
@@ -88,14 +123,18 @@ class Weather(object):
                 norm = abs(round(norm))
 
                 statement = str(descr[norm] + " " + weather_type + " " + periods[window["$"]])
-
                 output[statement] = norm * weight
 
-        sorted_output = sorted(output.items(), key=lambda x: x[1], reverse=True)
+                #  get weather_code statement 
+                weather_code_info = weather_code[window["W"]]
+                output[weather_code_info[0]] = weather_code_info[1]
 
+                
+        sorted_output = sorted(output.items(), key=lambda x: x[1], reverse=True)
         results = []
         for item in sorted_output[0:3]: 
             results.append(item[0])
-        
+    
+        print(results)
         return results
 
