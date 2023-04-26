@@ -1,6 +1,6 @@
 import os
 import time
-from visualise import Visualise
+# from visualise import Visualise
 from weather import Weather
 import openai
 import keys
@@ -19,10 +19,10 @@ colour = "red"
 
 if __name__ == "__main__":
     weather = Weather(KEY, LOCATION, OPENAI_KEY)
-    visualise = Visualise(WIDTH, HEIGHT)
+    # visualise = Visualise(WIDTH, HEIGHT)
     # while True:
     data = weather.update()
-    visualise.draw(data)
+    # visualise.draw(data)
         # visualise.display(colour)
         # Update every 5 mins
         # time.sleep(300)
