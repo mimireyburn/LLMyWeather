@@ -98,8 +98,34 @@ class Weather(object):
             "30": ["Thunder", 1]
         }
 
-        random_word = ["british", "sarcastic", "rude", "foul-mouthed", ""]
-        format = ["rap about today's weather forecast", "rhyming poem for the weather forecast", "weather forecast", "summary of the upcoming weather", "sentence about today's weather", "weather forecast in the style of Master Yoda"]
+        random_word = [
+            "british", 
+            "sarcastic", 
+            "rude", 
+            "foul-mouthed", 
+            "weird", 
+            "motivational", 
+            "", 
+            "optimistic", 
+            "pessimistic", 
+            "funny", 
+            "hilarious", 
+            "sassy"
+            ]
+
+        format = [
+            "rap about today's weather forecast", 
+            "rhyming poem for the weather forecast", 
+            "weather forecast", 
+            "summary of the upcoming weather", 
+            "sentence about today's weather", 
+            "weather forecast in the style of Master Yoda", 
+            "song about the upcoming weather", 
+            "movie plot about today's weather", 
+            "airport tanoy annoucement of today's weather", 
+            "SNL monologue announcing today's weather", 
+            "Presidential speech summarising today's weather"
+            ]
 
 
         data = requests.get("http://datapoint.metoffice.gov.uk/public/data/val/wxfcs/all/json/" + self.location + "?res=3hourly&key=" + self.key).text
@@ -139,7 +165,7 @@ class Weather(object):
         sorted_output = sorted(output.items(), key=lambda x: x[1], reverse=True)
         results = []
 
-        for item in sorted_output[0:5]: 
+        for item in sorted_output[0:2]: 
             results.append(item[0])
 
         results = ', '.join(results)
