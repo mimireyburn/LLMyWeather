@@ -32,40 +32,23 @@ OPENAI_KEY = keys.OPENAI_API_KEY
 
 
 class Forecast(object):
-    def __init__(self, FORECAST_5DAYS):
+    def __init__(self):
         self.FORECAST_5DAYS = FORECAST_5DAYS
 
     def update(self):
+        # Get forecast data from Met Office API
         forecast = requests.get(FORECAST_5DAYS).text
         forecast = json.loads(forecast)
 
-        with open("debug_future.json", "w") as write_file:
+        # Save forecast data to debug file
+        with open("debug_forecast.json", "w") as write_file:
             json.dump(forecast, write_file, indent=4)
 
-        # today = data["SiteRep"]["DV"]["FORECAST_Location"]["Period"][0]["Rep"]
-        # today.pop(0)
-
-    def get_parameters(self):
-        file_path = 'debug_future.json'
-
-        with open(file_path, 'r') as f:
-            data = json.load(f)
-
-        params = data["SiteRep"]["Wx"]["Param"]
-        param_dict = {}
-
-        for param in params:
-            name = param["name"]
-            param_dict[name] = {
-                "unit": param["units"],
-                "description": param["$"]
-            }
-
-        return param_dict
+        return forecast
 
     def parse_period_data(self):
 
-        file_path = 'debug_future.json'
+        file_path = 'debug_forecast.json'
         with open(file_path, 'r') as f:
             data = json.load(f)
 
@@ -84,9 +67,13 @@ class Forecast(object):
 
         return period_data
 
-    def create_string_list(self, parsed_data, parsed_period_data):
+    def create_string_list(self, parsed_period_data):
 
         result_list = []
+
+        # Get params from params.json
+        with open("params.json", "r") as f:
+            params = json.load(f)
 
         for period_key, period_data in parsed_period_data.items():
             dt = datetime.strptime(period_key, '%Y-%m-%dZ')
@@ -95,9 +82,16 @@ class Forecast(object):
                 time_str = convert_to_hour(int(time_key))
                 result_str = f"{day_of_week} @ {time_str}."
                 for param_key, param_value in time_data.items():
-                    if param_key in parsed_data:
-                        param_desc = parsed_data[param_key]["description"]
-                        param_units = parsed_data[param_key]["unit"]
+                    if param_key in params:
+                        param_desc = params[param_key]["description"]
+                        param_units = params[param_key]["unit"]
+
+                        try:
+                            param_def = params[param_key]["definition"]
+                            param_value = param_def[param_value]
+                        except KeyError:
+                            pass
+
                         param_str = f" {param_desc}: {param_value}{param_units},"
                         result_str += param_str
                 # Remove the trailing comma and add the result string to the list
@@ -114,13 +108,10 @@ def convert_to_hour(time):
 
 
 if __name__ == "__main__":
-    forecast = Forecast(FORECAST_5DAYS)
+    forecast = Forecast()
     # forecast.update()
 
     # Replace 'path/to/your/json_file.json' with the path to the JSON file you want to read
-    parsed_data = forecast.get_parameters()
-    print(parsed_data)
     parsed_period_data = forecast.parse_period_data()
-    print(parsed_period_data)
-    result_list = forecast.create_string_list(parsed_data, parsed_period_data)
+    result_list = forecast.create_string_list(parsed_period_data)
     print(result_list)
