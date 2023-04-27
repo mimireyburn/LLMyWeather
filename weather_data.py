@@ -2,7 +2,7 @@ import json
 import requests
 import openai
 import keys
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 # MET OFFICE
@@ -34,6 +34,7 @@ OPENAI_KEY = keys.OPENAI_API_KEY
 class Forecast(object):
     def __init__(self):
         self.FORECAST_5DAYS = FORECAST_5DAYS
+        self.OBSERVED_24HOURS = OBSERVED_24HOURS
 
     def update(self):
         # Get forecast data from Met Office API
@@ -75,16 +76,21 @@ class Forecast(object):
         with open("params.json", "r") as f:
             params = json.load(f)
 
+        # Convert the parsed data into a list of strings
         for period_key, period_data in parsed_period_data.items():
-            dt = datetime.strptime(period_key, '%Y-%m-%dZ')
-            day_of_week = dt.strftime('%A')
+            day_of_week = convert_to_day(period_key)
             for time_key, time_data in period_data.items():
                 time_str = convert_to_hour(int(time_key))
-                result_str = f"{day_of_week} @ {time_str}."
+                result_str = f"{day_of_week.upper()} @ {time_str}."
                 for param_key, param_value in time_data.items():
                     if param_key in params:
                         param_desc = params[param_key]["description"]
                         param_units = params[param_key]["unit"]
+
+                        try:
+                            param_value = str(round(float(param_value)))
+                        except ValueError:
+                            pass
 
                         try:
                             param_def = params[param_key]["definition"]
@@ -99,17 +105,35 @@ class Forecast(object):
 
         return result_list
 
-# Function to convert time to hour in 00:00 format
+
+def convert_to_day(date):
+    # Function to convert date to day of the week
+
+    # Check if the input date is today or tomorrow or yesterday
+    date = datetime.strptime(date, "%Y-%m-%dZ")
+    today = datetime.now().date()
+    if date.date() == today:
+        return "Today"
+    elif date.date() == today + timedelta(days=1):
+        return "Tomorrow"
+    elif date.date() == today - timedelta(days=1):
+        return "Yesterday"
+
+    # Get the day of the week
+    day_of_week = date.strftime("%A")
+    return day_of_week
 
 
 def convert_to_hour(time):
+    # Function to convert time to hour in 00:00 format
+
     hours, minutes = divmod(time, 60)
     return f"{hours:02d}:{minutes:02d}"
 
 
 if __name__ == "__main__":
     forecast = Forecast()
-    # forecast.update()
+    forecast.update()
 
     # Replace 'path/to/your/json_file.json' with the path to the JSON file you want to read
     parsed_period_data = forecast.parse_period_data()
