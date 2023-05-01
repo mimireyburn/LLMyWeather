@@ -31,44 +31,36 @@ HISTORICAL_DATA = HISTORICAL_URL + HISTORICAL_LOCATION + ".txt"
 OPENAI_KEY = keys.OPENAI_API_KEY
 
 
-class Forecast(object):
+class Weather(object):
     def __init__(self):
-        self.FORECAST_5DAYS = FORECAST_5DAYS
-        self.OBSERVED_24HOURS = OBSERVED_24HOURS
+        pass
 
-    def update(self):
+    def update(self, source_url):
+
         # Get forecast data from Met Office API
-        forecast = requests.get(FORECAST_5DAYS).text
-        forecast = json.loads(forecast)
+        data = requests.get(source_url).text
+        data = json.loads(data)
 
         # Save forecast data to debug file
         with open("debug_forecast.json", "w") as write_file:
-            json.dump(forecast, write_file, indent=4)
+            json.dump(data, write_file, indent=4)
 
-        return forecast
-
-    def parse_period_data(self):
-
-        file_path = 'debug_forecast.json'
-        with open(file_path, 'r') as f:
-            data = json.load(f)
-
+        # Parse the data into a dictionary
         periods = data["SiteRep"]["DV"]["Location"]["Period"]
-        period_data = {}
+        d = {}
 
         for period in periods:
-            period_value = period["value"]
-            period_data[period_value] = {}
+            report_date = period["value"]
+            for report in period["Rep"]:
+                time = report["$"]
+                report_datetime = self._convert_to_datetime(report_date, time)
+                report_data = {key: value for key,
+                               value in report.items() if key != "$"}
+                d[report_datetime] = report_data
 
-            for rep in period["Rep"]:
-                rep_key = rep["$"]
-                rep_data = {key: value for key,
-                            value in rep.items() if key != "$"}
-                period_data[period_value][rep_key] = rep_data
+        return d
 
-        return period_data
-
-    def create_string_list(self, parsed_period_data):
+    def weather_to_strings(self, data):
 
         result_list = []
 
@@ -77,65 +69,101 @@ class Forecast(object):
             params = json.load(f)
 
         # Convert the parsed data into a list of strings
-        for period_key, period_data in parsed_period_data.items():
-            day_of_week = convert_to_day(period_key)
-            for time_key, time_data in period_data.items():
-                time_str = convert_to_hour(int(time_key))
-                result_str = f"{day_of_week.upper()} @ {time_str}."
-                for param_key, param_value in time_data.items():
-                    if param_key in params:
-                        param_desc = params[param_key]["description"]
-                        param_units = params[param_key]["unit"]
+        for report_datetime, report_data in data.items():
 
+            # Convert datetime to date and HH:MM string
+            day_of_week = self._convert_to_day_string(report_datetime)
+            time_str = report_datetime.strftime('%l %p')
+            result_str = f"{day_of_week} @ {time_str}:"
+
+            # Add the report data to the result string
+            for param_key in params.keys():
+                if param_key in report_data.keys():
+                    param_value = report_data[param_key]
+                    # param_desc = params[param_key]["description"]
+                    param_ignore = params[param_key]["ignore"]
+                    param_units = params[param_key]["unit"]
+                    if param_ignore == False:
                         try:
                             param_value = str(round(float(param_value)))
                         except ValueError:
                             pass
-
                         try:
                             param_def = params[param_key]["definition"]
                             param_value = param_def[param_value]
                         except KeyError:
                             pass
 
-                        param_str = f" {param_desc}: {param_value}{param_units},"
+                        param_str = f" {param_value}{param_units},"
                         result_str += param_str
                 # Remove the trailing comma and add the result string to the list
-                result_list.append(result_str[:-1])
+            result_list.append(result_str[:-1])
 
         return result_list
 
+    def _convert_to_day_string(self, date):
+        # Check if the input date is today or tomorrow or yesterday
+        today = datetime.now().date()
+        if date.date() == today:
+            return "Today"
+        elif date.date() == today + timedelta(days=1):
+            return "Tomorrow"
+        elif date.date() == today - timedelta(days=1):
+            return "Yesterday"
 
-def convert_to_day(date):
-    # Function to convert date to day of the week
+        # Return the day of the week
+        return date.strftime("%A")
 
-    # Check if the input date is today or tomorrow or yesterday
-    date = datetime.strptime(date, "%Y-%m-%dZ")
-    today = datetime.now().date()
-    if date.date() == today:
-        return "Today"
-    elif date.date() == today + timedelta(days=1):
-        return "Tomorrow"
-    elif date.date() == today - timedelta(days=1):
-        return "Yesterday"
+    def _convert_to_datetime(self, date, time):
+        # Function to convert date and time strings to datetime object
+        date = datetime.strptime(date, "%Y-%m-%dZ")
+        # Convert time to datetime.time by first dividing by 60
+        hours = int(time) // 60
+        minutes = int(time) % 60
+        time = datetime.strptime(f"{hours}:{minutes}", "%H:%M").time()
 
-    # Get the day of the week
-    day_of_week = date.strftime("%A")
-    return day_of_week
+        # Combine date and time into a datetime object
 
-
-def convert_to_hour(time):
-    # Function to convert time to hour in 00:00 format
-
-    hours, minutes = divmod(time, 60)
-    return f"{hours:02d}:{minutes:02d}"
+        return datetime.combine(date, time)
 
 
 if __name__ == "__main__":
-    forecast = Forecast()
-    forecast.update()
 
-    # Replace 'path/to/your/json_file.json' with the path to the JSON file you want to read
-    parsed_period_data = forecast.parse_period_data()
-    result_list = forecast.create_string_list(parsed_period_data)
-    print(result_list)
+    # Get the weather forecast from the Met Office API
+    weather = Weather()
+    forecast = weather.update(FORECAST_5DAYS)
+
+    timenow = datetime.now()
+
+    # Discard forecast data older than 3 hours ago
+    forecast = {key: value for key, value in forecast.items() if key >
+                timenow - timedelta(hours=3)}
+
+    # Discard data past the end of today
+    forecast = {key: value for key, value in forecast.items() if key <
+                timenow.replace(hour=23, minute=59, second=59)}
+
+    # Convert the forecast data to a list of strings
+    forecast = weather.weather_to_strings(forecast)
+
+    # Get the observed weather from the Met Office API
+    observed = weather.update(OBSERVED_24HOURS)
+
+    # Convert data to 3h intervals
+    observed = {key: value for key,
+                value in observed.items() if key.hour % 3 == 0}
+
+    # Discard data after 9pm and before 6am
+    observed = {key: value for key,
+                value in observed.items() if key.hour > 6 and key.hour < 21}
+
+    # Convert the observed data to a list of strings
+    observed = weather.weather_to_strings(observed)
+
+    print("Today's weather forecast:")
+    for item in forecast:
+        print(item)
+
+    print("For context, the weather over the past day:")
+    for item in observed:
+        print(item)
