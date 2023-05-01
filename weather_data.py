@@ -31,6 +31,22 @@ HISTORICAL_DATA = HISTORICAL_URL + HISTORICAL_LOCATION + ".txt"
 OPENAI_KEY = keys.OPENAI_API_KEY
 
 
+class OpenAI(object):
+
+    def get(self, prompt):
+        openai.api_key = OPENAI_KEY
+        response = openai.Completion.create(
+            model="text-davinci-002",
+            prompt=prompt,
+            temperature=0.7,
+            max_tokens=128,
+            top_p=1,
+            frequency_penalty=1.7,
+            presence_penalty=1.0
+        )
+        return response
+
+
 class Weather(object):
     def __init__(self):
         pass
@@ -131,9 +147,35 @@ if __name__ == "__main__":
 
     # Get the weather forecast from the Met Office API
     weather = Weather()
-    forecast = weather.update(FORECAST_5DAYS)
-
     timenow = datetime.now()
+    timenow = timenow.replace(hour=11)
+
+    # Get the observed weather from the Met Office API
+    observed = weather.update(OBSERVED_24HOURS)
+
+    # Convert data to 3h intervals
+    observed = {key: value for key,
+                value in observed.items() if key.hour % 3 == 0}
+
+    # If time is before midday, discard data from today and from after 9pm yesterday
+    if timenow.hour < 12:
+        observed = {key: value for key, value in observed.items() if key <
+                    timenow.replace(hour=21, minute=0, second=0) - timedelta(days=1)}
+
+    # If time is after midday, discard data from yesterday and before 6am today
+    if timenow.hour >= 12:
+        observed = {key: value for key, value in observed.items() if key >
+                    timenow.replace(hour=5, minute=59, second=59)}
+
+    # Convert the observed data to a list of strings
+    observed = weather.weather_to_strings(observed)
+
+    print("Earlier:")
+    for item in observed:
+        print(item)
+
+    # Get the forecast weather from the Met Office API
+    forecast = weather.update(FORECAST_5DAYS)
 
     # Discard forecast data older than 3 hours ago
     forecast = {key: value for key, value in forecast.items() if key >
@@ -146,24 +188,8 @@ if __name__ == "__main__":
     # Convert the forecast data to a list of strings
     forecast = weather.weather_to_strings(forecast)
 
-    # Get the observed weather from the Met Office API
-    observed = weather.update(OBSERVED_24HOURS)
-
-    # Convert data to 3h intervals
-    observed = {key: value for key,
-                value in observed.items() if key.hour % 3 == 0}
-
-    # Discard data after 9pm and before 6am
-    observed = {key: value for key,
-                value in observed.items() if key.hour > 6 and key.hour < 21}
-
-    # Convert the observed data to a list of strings
-    observed = weather.weather_to_strings(observed)
-
-    print("Today's weather forecast:")
+    print("Later:")
     for item in forecast:
         print(item)
 
-    print("For context, the weather over the past day:")
-    for item in observed:
-        print(item)
+    print("Give a one-sentence, qualitative summary/comparison of the forecast later:")
