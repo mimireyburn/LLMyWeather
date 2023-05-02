@@ -1,0 +1,57 @@
+/* ===GLOBAL=== */
+
+* {
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+
+:root {
+  --very-white: #ffffff;
+  --very-black: #000000;
+}
+
+html {
+  font-size: calc(15px + 0.390625vw);
+}
+
+/* ===FONTS=== */
+
+@font-face {
+  font-family: "hyperlegible";
+  src: url("fonts/AtkinsonHyperlegible-BoldItalic.ttf") format("truetype");
+  font-weight: bold;
+  font-style: italic, oblique;
+}
+
+@font-face {
+  font-family: "hyperlegible";
+  src: url("fonts/AtkinsonHyperlegible-Bold.ttf") format("truetype");
+  font-weight: bold;
+}
+
+@font-face {
+  font-family: "hyperlegible";
+  src: url("fonts/AtkinsonHyperlegible-Italic.ttf") format("truetype");
+  font-style: italic, oblique;
+}
+
+@font-face {
+  font-family: "hyperlegible";
+  src: url("fonts/AtkinsonHyperlegible-Regular.ttf") format("truetype");
+}
+
+/* ===PRIMARY=== */
+
+body {
+  width: min(90vw, 1200px);
+  margin: auto;
+  background: var(--very-white);
+  font-family: "hyperlegible", sans-serif;
+  line-height: 1.65;
+}
+
+::selection {
+  background-color: var(--very-black);
+  color: var(--very-white);
+}
