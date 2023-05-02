@@ -1,5 +1,6 @@
 {
    "W": {
+      "ignore": false,
       "unit": "",
       "description": "Weather type",
       "definition": {
@@ -38,34 +39,42 @@
       }
    },
    "T": {
-      "unit": "C",
+      "ignore": false,
+      "unit": "°C",
       "description": "Temperature"
    },
    "F": {
-      "unit": "C",
+      "ignore": true,
+      "unit": "°C",
       "description": "Feels like"
    },
    "Pp": {
-      "unit": "% probability",
+      "ignore": false,
+      "unit": "% precipitation",
       "description": "Precipitation"
    },
    "S": {
-      "unit": "mph",
+      "ignore": false,
+      "unit": "mph wind",
       "description": "Wind speed"
    },
-   "_G": {
-      "unit": "mph",
+   "G": {
+      "ignore": true,
+      "unit": "mph gusts",
       "description": "Gust speed"
    },
-   "_D": {
+   "D": {
+      "ignore": true,
       "unit": "",
       "description": "Wind direction"
    },
-   "_H": {
+   "H": {
+      "ignore": true,
       "unit": "%",
       "description": "Relative humidity"
    },
-   "_U": {
+   "U": {
+      "ignore": true,
       "unit": "",
       "description": "UV",
       "definition": {
