@@ -82,7 +82,7 @@ class Weather:
         data = requests.get(source_url).text
         data = json.loads(data)
 
-        # Save forecast data to debug file
+        # # Save forecast data to debug file
         # with open("debug.json", "w") as write_file:
         #     json.dump(data, write_file, indent=4)
 
