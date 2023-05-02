@@ -83,8 +83,8 @@ class Weather:
         data = json.loads(data)
 
         # Save forecast data to debug file
-        with open("debug_forecast.json", "w") as write_file:
-            json.dump(data, write_file, indent=4)
+        # with open("debug.json", "w") as write_file:
+        #     json.dump(data, write_file, indent=4)
 
         # Parse the data into a dictionary
         periods = data["SiteRep"]["DV"]["Location"]["Period"]
