@@ -1,55 +1,78 @@
 import json
 import requests
 import openai
-import keys
 from datetime import datetime, timedelta
+from random import choice
+import csv
 
+import keys
 
 # MET OFFICE
 MET_OFFICE_API_KEY = keys.MET_OFFICE_API_KEY
-
-# Five day forecast
-FORECAST_URL = "http://datapoint.metoffice.gov.uk/public/data/val/wxfcs/all/json/"
 FORECAST_LOCATION = keys.FORECAST_LOCATION
-FORECAST_RESOLUTION = "3hourly"
-FORECAST_5DAYS = FORECAST_URL + FORECAST_LOCATION + \
-    "?res=" + FORECAST_RESOLUTION + "&key=" + MET_OFFICE_API_KEY
-
-# Observed weather
-OBSERVED_URL = "http://datapoint.metoffice.gov.uk/public/data/val/wxobs/all/json/"
 OBSERVED_LOCATION = keys.OBSERVED_LOCATION
-OBSERVED_RESOLUTION = "hourly"
-OBSERVED_24HOURS = OBSERVED_URL + OBSERVED_LOCATION + \
-    "?res=" + OBSERVED_RESOLUTION + "&key=" + MET_OFFICE_API_KEY
-
-# Historical weather
-HISTORICAL_URL = "https://www.metoffice.gov.uk/pub/data/weather/uk/climate/datasets/Tmean/date/"
 HISTORICAL_LOCATION = keys.HISTORICAL_LOCATION
-HISTORICAL_DATA = HISTORICAL_URL + HISTORICAL_LOCATION + ".txt"
 
 # OPENAI
 OPENAI_KEY = keys.OPENAI_API_KEY
 
+FORECAST_URL = "http://datapoint.metoffice.gov.uk/public/data/val/wxfcs/all/json/"
+FORECAST_RESOLUTION = "3hourly"
+FORECAST_5DAYS = f"{FORECAST_URL}{FORECAST_LOCATION}?res={FORECAST_RESOLUTION}&key={MET_OFFICE_API_KEY}"
 
-class OpenAI(object):
+OBSERVED_URL = "http://datapoint.metoffice.gov.uk/public/data/val/wxobs/all/json/"
+OBSERVED_RESOLUTION = "hourly"
+OBSERVED_24HOURS = f"{OBSERVED_URL}{OBSERVED_LOCATION}?res={OBSERVED_RESOLUTION}&key={MET_OFFICE_API_KEY}"
 
-    def get(self, prompt):
+HISTORICAL_URL = "https://www.metoffice.gov.uk/pub/data/weather/uk/climate/datasets/Tmean/date/"
+HISTORICAL_DATA = f"{HISTORICAL_URL}{HISTORICAL_LOCATION}.txt"
+
+
+class OpenAI:
+    def __init__(self):
+        pass
+
+    def summarise_forecast(self, forecast):
         openai.api_key = OPENAI_KEY
 
-        response = openai.Completion.create(
-            model="text-davinci-003",
-            prompt=prompt,
-            temperature=0.6,
-            max_tokens=128,
-            top_p=1,
-            frequency_penalty=2,
-            presence_penalty=2
+        message = forecast
+        messages = [{"role": "system", "content":
+                     "You are a intelligent assistant that gives summaries of the weather. Answer as concisely as possible."}]
+        messages.append(
+            {"role": "user", "content": message},
+        )
+        chat = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo", messages=messages, max_tokens=128
         )
 
-        return response
+        reply = chat.choices[0].message.content
+        messages.append({"role": "assistant", "content": reply})
+
+        return reply
+
+    def change_style(self, forecast, style):
+
+        openai.api_key = OPENAI_KEY
+
+        messages = [{"role": "system", "content":
+                     "You are a funny assistant that changes the style of weather reports. Answer as concisely as possible."}]
+        message = "Change the following to the style of " + \
+            style + ": \n" + forecast + "\n" + "Be as concise as possible."
+
+        messages.append(
+            {"role": "user", "content": message},
+        )
+        chat = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo", messages=messages, max_tokens=128
+        )
+
+        reply = chat.choices[0].message.content
+        messages.append({"role": "assistant", "content": reply})
+
+        return reply
 
 
-class Weather(object):
+class Weather:
     def __init__(self):
         pass
 
@@ -144,55 +167,58 @@ class Weather(object):
 
         return datetime.combine(date, time)
 
+    def generate_report(weather):
+        timenow = datetime.now()
+
+        observed = weather.update(OBSERVED_24HOURS)
+        observed = {key: value for key,
+                    value in observed.items() if key.hour % 3 == 0}
+
+        if timenow.hour < 12:
+            observed = {key: value for key, value in observed.items() if key <
+                        timenow.replace(hour=21, minute=0, second=0) - timedelta(days=1)}
+        elif timenow.hour >= 12:
+            observed = {key: value for key, value in observed.items() if key >
+                        timenow.replace(hour=5, minute=59, second=59)}
+
+        observed_strings = weather.weather_to_strings(observed)
+
+        forecast = weather.update(FORECAST_5DAYS)
+        forecast = {key: value for key, value in forecast.items() if key >
+                    timenow - timedelta(hours=3)}
+        forecast = {key: value for key, value in forecast.items() if key <
+                    timenow.replace(hour=23, minute=59, second=59)}
+
+        forecast_strings = weather.weather_to_strings(forecast)
+
+        prompt = [
+            "Past:",
+            *observed_strings,
+            "Future forecast:",
+            *forecast_strings,
+            "Give a one-sentence, qualitative summary/comparison of the forecast:"
+        ]
+
+        return '\n'.join(prompt)
+
+    def random_style(self):
+        # Function to return random (style_name, style_description) from styles.csv
+
+        with open("styles.csv", "r") as f:
+            styles = list(csv.reader(f))
+        style = choice(styles)
+        return style
+
 
 if __name__ == "__main__":
-
-    # Get the weather forecast from the Met Office API
     weather = Weather()
-    timenow = datetime.now()
-    # timenow = timenow.replace(hour=11)
+    weather_report = weather.generate_report()
+    style = weather.random_style()
 
-    # Get the observed weather from the Met Office API
-    observed = weather.update(OBSERVED_24HOURS)
+    LLM = OpenAI()
+    # forecast = LLM.summarise_forecast(weather_report)
 
-    # Convert data to 3h intervals
-    observed = {key: value for key,
-                value in observed.items() if key.hour % 3 == 0}
-
-    # If time is before midday, discard data from today and from after 9pm yesterday
-    if timenow.hour < 12:
-        observed = {key: value for key, value in observed.items() if key <
-                    timenow.replace(hour=21, minute=0, second=0) - timedelta(days=1)}
-
-    # If time is after midday, discard data from yesterday and before 6am today
-    elif timenow.hour >= 12:
-        observed = {key: value for key, value in observed.items() if key >
-                    timenow.replace(hour=5, minute=59, second=59)}
-
-    # Convert the observed data to a list of strings
-    observed = weather.weather_to_strings(observed)
-
-    print("Past:")
-    for item in observed:
-        print(item)
-
-    # Get the forecast weather from the Met Office API
-    forecast = weather.update(FORECAST_5DAYS)
-
-    # Discard forecast data older than 3 hours ago
-    forecast = {key: value for key, value in forecast.items() if key >
-                timenow - timedelta(hours=3)}
-
-    # Discard data past the end of today
-    forecast = {key: value for key, value in forecast.items() if key <
-                timenow.replace(hour=23, minute=59, second=59)}
-
-    # Convert the forecast data to a list of strings
-    forecast = weather.weather_to_strings(forecast)
-
-    print("Future forecast:")
-
-    for item in forecast:
-        print(item)
-
-    print("Give a two-sentence, qualitative summary/comparison of the forecast:")
+    forecast = "Today's forecast is slightly cooler than yesterday with a chance of light precipitation and mostly cloudy skies throughout the day."
+    print(style[0] + ":")
+    response = LLM.change_style(forecast, style[1])
+    print(response)
