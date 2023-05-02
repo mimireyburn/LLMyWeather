@@ -35,15 +35,17 @@ class OpenAI(object):
 
     def get(self, prompt):
         openai.api_key = OPENAI_KEY
+
         response = openai.Completion.create(
-            model="text-davinci-002",
+            model="text-davinci-003",
             prompt=prompt,
-            temperature=0.7,
+            temperature=0.6,
             max_tokens=128,
             top_p=1,
-            frequency_penalty=1.7,
-            presence_penalty=1.0
+            frequency_penalty=2,
+            presence_penalty=2
         )
+
         return response
 
 
@@ -148,7 +150,7 @@ if __name__ == "__main__":
     # Get the weather forecast from the Met Office API
     weather = Weather()
     timenow = datetime.now()
-    timenow = timenow.replace(hour=11)
+    # timenow = timenow.replace(hour=11)
 
     # Get the observed weather from the Met Office API
     observed = weather.update(OBSERVED_24HOURS)
@@ -163,14 +165,14 @@ if __name__ == "__main__":
                     timenow.replace(hour=21, minute=0, second=0) - timedelta(days=1)}
 
     # If time is after midday, discard data from yesterday and before 6am today
-    if timenow.hour >= 12:
+    elif timenow.hour >= 12:
         observed = {key: value for key, value in observed.items() if key >
                     timenow.replace(hour=5, minute=59, second=59)}
 
     # Convert the observed data to a list of strings
     observed = weather.weather_to_strings(observed)
 
-    print("Earlier:")
+    print("Past:")
     for item in observed:
         print(item)
 
@@ -188,8 +190,9 @@ if __name__ == "__main__":
     # Convert the forecast data to a list of strings
     forecast = weather.weather_to_strings(forecast)
 
-    print("Later:")
+    print("Future forecast:")
+
     for item in forecast:
         print(item)
 
-    print("Give a one-sentence, qualitative summary/comparison of the forecast later:")
+    print("Give a two-sentence, qualitative summary/comparison of the forecast:")
