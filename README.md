@@ -1,6 +1,6 @@
 # WTHR
 
-WTHR is an application for summarising weather data in a single sentance, using LLMs.
+WTHR is an application for summarising weather data in a single sentence, using LLMs.
 
 - Pulls live data from the UK Met Office API
 - Summarises data with gpt-3.5-turbo API
