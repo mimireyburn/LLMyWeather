@@ -1,194 +1,210 @@
-import json 
+import json
 import requests
-import os
 import openai
-import random
+from datetime import datetime, timedelta
+from random import choice
+import csv
 
-class Weather(object):
-    def __init__(self, key, location, openai_key):
-        self.key = key
-        self.location = location
-        self.openai_key = openai_key
+import keys
 
-    def update(self):
+# MET OFFICE
+MET_OFFICE_API_KEY = keys.MET_OFFICE_API_KEY
+FORECAST_LOCATION = keys.FORECAST_LOCATION
+OBSERVED_LOCATION = keys.OBSERVED_LOCATION
+HISTORICAL_LOCATION = keys.HISTORICAL_LOCATION
 
-        descr = {
-            0.0 : ["not", "not even a little", "never"],
-            0.1 : ["a tiny bit", "a tad", "a wee bit"],
-            0.2 : ["a touch", "slightly", "you could say it is"],
-            0.3 : ["just a bit", "kinda", "sort of"],
-            0.4 : ["a bit", "pretty", "a good bit"],
-            0.5 : ["quite", "partly", "fairly"],
-            0.6 : ["very", "mostly", "getting pretty"],
-            0.7 : ["oh shit it's", "oh boy, it's", "heckin'"],
-            0.8 : ["extremely", "awfully", "wildly"],
-            0.9 : ["disgustingly", "exceptionally", "overwhelmingly"],
-            1.0 : ["FUCKING", "unbelievably", "insanely"]
-        }
+# OPENAI
+OPENAI_KEY = keys.OPENAI_API_KEY
 
-        mydict = {
-            "rainy":{
-                "ID": "Pp",
-                "maximum_impact": 100,
-                "zero_impact": 0,
-                "weight":1
-                },
-            "windy":{
-                "ID": "S",
-                "maximum_impact":30,
-                "zero_impact": 0,
-                "weight": 0.6
-                },
-            "hot":{
-                "ID": "F",
-                "maximum_impact":40,
-                "zero_impact":20,
-                "weight":0.7
-                },
-            "cold":{
-                "ID": "F",
-                "maximum_impact":-5,
-                "zero_impact":20,
-                "weight":0.7
-            }
-        }
+FORECAST_URL = "http://datapoint.metoffice.gov.uk/public/data/val/wxfcs/all/json/"
+FORECAST_RESOLUTION = "3hourly"
+FORECAST_5DAYS = f"{FORECAST_URL}{FORECAST_LOCATION}?res={FORECAST_RESOLUTION}&key={MET_OFFICE_API_KEY}"
 
-        periods = {
-            "0": "at night", 
-            "180": "early morning", 
-            "360": "in the morning", 
-            "540": "late morning", 
-            "720": "early afternoon", 
-            "900": "late afternoon", 
-            "1080": "in the evening", 
-            "1260": "late evening"
-        }
+OBSERVED_URL = "http://datapoint.metoffice.gov.uk/public/data/val/wxobs/all/json/"
+OBSERVED_RESOLUTION = "hourly"
+OBSERVED_24HOURS = f"{OBSERVED_URL}{OBSERVED_LOCATION}?res={OBSERVED_RESOLUTION}&key={MET_OFFICE_API_KEY}"
 
-        weather_code = { 
-            "0" : ["Clear night", 0],
-            "1" : ["Sunny day", 0.8],
-            "2" : ["Partly cloudy (night)",  0],
-            "3" : ["Partly cloudy (day)",  0],
-            "4" : ["Not used", 0],
-            "5" : ["Mist", 1],
-            "6" : ["Fog", 1],
-            "7" : ["Cloudy", 0.1],
-            "8" : ["Overcast", 0.3],
-            "9" : ["Light rain shower (night)", 0.4],
-            "10": ["Light rain shower (day)", 0.4],
-            "11": ["Drizzle", 0.4],
-            "12": ["Light rain", 1],
-            "13": ["Heavy rain shower (night)", 1],
-            "14": ["Heavy rain shower (day)", 1],
-            "15": ["Heavy rain", 1],
-            "16": ["Sleet shower (night)", 1],
-            "17": ["Sleet shower (day)", 1],
-            "18": ["Sleet", 1],
-            "19": ["Hail shower (night)", 1],
-            "20": ["Hail shower (day)", 1],
-            "21": ["Hail", 1],
-            "22": ["Light snow shower (night)", 1],
-            "23": ["Light snow shower (day)", 1],
-            "24": ["Light snow", 1],
-            "25": ["Heavy snow shower (night)", 1],
-            "26": ["Heavy snow shower (day)", 1],
-            "27": ["Heavy snow", 1],
-            "28": ["Thunder shower (night)", 1],
-            "29": ["Thunder shower (day)", 1],
-            "30": ["Thunder", 1]
-        }
-
-        random_word = [
-            "british", 
-            "sarcastic", 
-            "rude", 
-            "foul-mouthed", 
-            "weird", 
-            "motivational", 
-            "", 
-            "optimistic", 
-            "pessimistic", 
-            "funny", 
-            "hilarious", 
-            "sassy"
-            ]
-
-        format = [
-            "rap about today's weather forecast", 
-            "rhyming poem for the weather forecast", 
-            "weather forecast", 
-            "summary of the upcoming weather", 
-            "sentence about today's weather", 
-            "weather forecast in the style of Master Yoda", 
-            "song about the upcoming weather", 
-            "movie plot about today's weather", 
-            "airport tanoy annoucement of today's weather", 
-            "SNL monologue announcing today's weather", 
-            "Presidential speech summarising today's weather"
-            ]
+HISTORICAL_URL = "https://www.metoffice.gov.uk/pub/data/weather/uk/climate/datasets/Tmean/date/"
+HISTORICAL_DATA = f"{HISTORICAL_URL}{HISTORICAL_LOCATION}.txt"
 
 
-        data = requests.get("http://datapoint.metoffice.gov.uk/public/data/val/wxfcs/all/json/" + self.location + "?res=3hourly&key=" + self.key).text
-        data = json.loads(data)
+class OpenAI:
+    def __init__(self):
+        pass
 
-        today = data["SiteRep"]["DV"]["Location"]["Period"][0]["Rep"]
-        today.pop(0)
+    def summarise_forecast(self, forecast):
+        openai.api_key = OPENAI_KEY
 
-        output = {}
-
-        for window in today: 
-            for weather_type in mydict.keys():
-                id = mydict[weather_type]["ID"]
-                val = int(window[id])
-                    
-                zero_impact = mydict[weather_type]["zero_impact"]
-                maximum_impact = mydict[weather_type]["maximum_impact"]
-
-                if maximum_impact < zero_impact:
-                    val = min(max(val, maximum_impact), zero_impact)
-                else:
-                    val = max(min(val, maximum_impact), zero_impact)
-
-                norm = ((val - zero_impact)/(maximum_impact - zero_impact))
-                weight = mydict[weather_type]["weight"]
-
-                norm = abs(round(norm, 1))
-
-                statement = str(descr[norm][random.randint(0,2)] + " " + weather_type + " " + periods[window["$"]])
-                output[statement] = norm * weight
-
-                #  get weather_code statement 
-                weather_code_info = weather_code[window["W"]]
-                output[weather_code_info[0] + " " + periods[window["$"]]] = weather_code_info[1]
-
-                
-        sorted_output = sorted(output.items(), key=lambda x: x[1], reverse=True)
-        results = []
-
-        for item in sorted_output[0:2]: 
-            results.append(item[0])
-
-        results = ', '.join(results)
-
-        adjective = random_word[random.randint(0,len(random_word)-1)]
-
-        forecast_format = format[random.randint(0, len(format)-1)]
-
-        prompt = "Write a " + adjective + " " + forecast_format + " from this prompt: " + results
-
-        openai.api_key = self.openai_key
-        response = openai.Completion.create(
-        model="text-davinci-002",
-        prompt=prompt,
-        temperature=0.7,
-        max_tokens=128,
-        top_p=1,
-        frequency_penalty=1.7,
-        presence_penalty=1.0
+        message = forecast
+        messages = [{"role": "system", "content":
+                     "You are a intelligent assistant that gives summaries of the weather. Answer as concisely as possible."}]
+        messages.append(
+            {"role": "user", "content": message},
+        )
+        chat = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo", messages=messages, max_tokens=128
         )
 
-        print("PROMPT:", prompt)
-        print(response["choices"][0]["text"])
+        reply = chat.choices[0].message.content
+        messages.append({"role": "assistant", "content": reply})
 
-        return response
+        return reply
 
+    def change_style(self, forecast, style):
+
+        openai.api_key = OPENAI_KEY
+
+        messages = [{"role": "system", "content":
+                     "You are a funny assistant that changes the style of weather reports. Answer as concisely as possible."}]
+        message = "Change the following to the style of " + \
+            style + ": \n" + forecast + "\n" + "Be as concise as possible."
+
+        messages.append(
+            {"role": "user", "content": message},
+        )
+        chat = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo", messages=messages, max_tokens=128
+        )
+
+        reply = chat.choices[0].message.content
+        messages.append({"role": "assistant", "content": reply})
+
+        return reply
+
+
+class Weather:
+    def __init__(self):
+        pass
+
+    def update(self, source_url):
+
+        # Get forecast data from Met Office API
+        data = requests.get(source_url).text
+        data = json.loads(data)
+
+        # # Save forecast data to debug file
+        # with open("debug.json", "w") as write_file:
+        #     json.dump(data, write_file, indent=4)
+
+        # Parse the data into a dictionary
+        periods = data["SiteRep"]["DV"]["Location"]["Period"]
+        d = {}
+
+        for period in periods:
+            report_date = period["value"]
+            for report in period["Rep"]:
+                time = report["$"]
+                report_datetime = self._convert_to_datetime(report_date, time)
+                report_data = {key: value for key,
+                               value in report.items() if key != "$"}
+                d[report_datetime] = report_data
+
+        return d
+
+    def weather_to_strings(self, data):
+
+        result_list = []
+
+        # Get params from params.json
+        with open("params.json", "r") as f:
+            params = json.load(f)
+
+        # Convert the parsed data into a list of strings
+        for report_datetime, report_data in data.items():
+
+            # Convert datetime to date and HH:MM string
+            day_of_week = self._convert_to_day_string(report_datetime)
+            time_str = report_datetime.strftime('%l %p')
+            result_str = f"{day_of_week} @ {time_str}:"
+
+            # Add the report data to the result string
+            for param_key in params.keys():
+                if param_key in report_data.keys():
+                    param_value = report_data[param_key]
+                    # param_desc = params[param_key]["description"]
+                    param_ignore = params[param_key]["ignore"]
+                    param_units = params[param_key]["unit"]
+                    if param_ignore == False:
+                        try:
+                            param_value = str(round(float(param_value)))
+                        except ValueError:
+                            pass
+                        try:
+                            param_def = params[param_key]["definition"]
+                            param_value = param_def[param_value]
+                        except KeyError:
+                            pass
+
+                        param_str = f" {param_value}{param_units},"
+                        result_str += param_str
+                # Remove the trailing comma and add the result string to the list
+            result_list.append(result_str[:-1])
+
+        return result_list
+
+    def _convert_to_day_string(self, date):
+        # Check if the input date is today or tomorrow or yesterday
+        today = datetime.now().date()
+        if date.date() == today:
+            return "Today"
+        elif date.date() == today + timedelta(days=1):
+            return "Tomorrow"
+        elif date.date() == today - timedelta(days=1):
+            return "Yesterday"
+
+        # Return the day of the week
+        return date.strftime("%A")
+
+    def _convert_to_datetime(self, date, time):
+        # Function to convert date and time strings to datetime object
+        date = datetime.strptime(date, "%Y-%m-%dZ")
+        # Convert time to datetime.time by first dividing by 60
+        hours = int(time) // 60
+        minutes = int(time) % 60
+        time = datetime.strptime(f"{hours}:{minutes}", "%H:%M").time()
+
+        # Combine date and time into a datetime object
+
+        return datetime.combine(date, time)
+
+    def generate_report(weather):
+        timenow = datetime.now()
+
+        observed = weather.update(OBSERVED_24HOURS)
+        observed = {key: value for key,
+                    value in observed.items() if key.hour % 3 == 0}
+
+        if timenow.hour < 12:
+            observed = {key: value for key, value in observed.items() if key <
+                        timenow.replace(hour=21, minute=0, second=0) - timedelta(days=1)}
+        elif timenow.hour >= 12:
+            observed = {key: value for key, value in observed.items() if key >
+                        timenow.replace(hour=5, minute=59, second=59)}
+
+        observed_strings = weather.weather_to_strings(observed)
+
+        forecast = weather.update(FORECAST_5DAYS)
+        forecast = {key: value for key, value in forecast.items() if key >
+                    timenow - timedelta(hours=3)}
+        forecast = {key: value for key, value in forecast.items() if key <
+                    timenow.replace(hour=23, minute=59, second=59)}
+
+        forecast_strings = weather.weather_to_strings(forecast)
+
+        prompt = [
+            "Past:",
+            *observed_strings,
+            "Future forecast:",
+            *forecast_strings,
+            "Give a one-sentence, qualitative summary/comparison of the forecast:"
+        ]
+
+        return '\n'.join(prompt)
+
+    def random_style(self):
+        # Function to return random (style_name, style_description) from styles.csv
+
+        with open("styles.csv", "r") as f:
+            styles = list(csv.reader(f))
+        style = choice(styles)
+        return style
