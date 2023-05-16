@@ -69,7 +69,7 @@ class OpenAI:
         reply = chat.choices[0].message.content
         messages.append({"role": "assistant", "content": reply})
 
-        return reply
+        return message, reply
 
 
 class Weather:
@@ -82,9 +82,9 @@ class Weather:
         data = requests.get(source_url).text
         data = json.loads(data)
 
-        # # Save forecast data to debug file
-        # with open("debug.json", "w") as write_file:
-        #     json.dump(data, write_file, indent=4)
+        # Save forecast data to debug file
+        with open("debug_weather.json", "w") as write_file:
+            json.dump(data, write_file, indent=4)
 
         # Parse the data into a dictionary
         periods = data["SiteRep"]["DV"]["Location"]["Period"]
