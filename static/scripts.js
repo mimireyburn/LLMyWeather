@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function adjustFontSize() {
-  const element = document.getElementById("overlay-text");
+  const element = document.getElementById("screen-text");
   const text = element.innerHTML;
 
   let fontSize = 0;
