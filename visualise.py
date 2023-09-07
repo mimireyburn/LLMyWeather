@@ -25,7 +25,7 @@ class Visualise(object):
             text_lines.append(' '.join(text_line))
         return text_lines
 
-    def draw(self, message):
+    def draw(self, message, style):
 
         font = ImageFont.truetype("AtkinsonHyperlegible-Regular.ttf", size=20)
 
@@ -57,7 +57,6 @@ class Visualise(object):
         # imgDraw.text((xText, yText), message, font=font, fill=(0, 0, 0))
 
         # Add style in bottom right corner
-        style = "Style: " + message.split("Style: ")[1].split("\n")[0]
         styleWidth, styleHeight = imgDraw.textsize(style, font=font)
         xStyle = self.width - styleWidth - 10
         yStyle = self.height - styleHeight - 10

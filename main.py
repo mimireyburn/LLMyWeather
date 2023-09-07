@@ -35,7 +35,7 @@ if __name__ == "__main__":
         result = style_name + ": \n" + stylecast
 
         # Render on e-ink display
-        visualise.draw(stylecast)
+        visualise.draw(stylecast, style_name)
         visualise.display(color)
 
         time.sleep(60)
