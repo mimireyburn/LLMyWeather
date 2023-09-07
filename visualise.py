@@ -33,7 +33,8 @@ class Visualise(object):
         inky_display.set_border(inky_display.WHITE)
         # convert image 
         current_path = os.getcwd()
-        img = Image.open(os.path.join(current_path, "weather.png"))
+        print("filepath", current_path)
+        img = Image.open("/home/weather/WTHR/weather.png")
 
         pal_img = Image.new("P", (1, 1))
         pal_img.putpalette((255, 255, 255, 0, 0, 0, 255, 0, 0) + (0, 0, 0) * 252)
