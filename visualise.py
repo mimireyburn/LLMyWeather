@@ -15,7 +15,7 @@ class Visualise(object):
         text_line = []
         text_words = text.split()
         for word in text_words:
-            if font.getsize(' '.join(text_line + [word]))[0] <= width:
+            if font.getsize(' '.join(text_line + [word]))[0] <= (width-20):
                 text_line.append(word)
             else:
                 if text_line:
@@ -35,22 +35,23 @@ class Visualise(object):
         # Wrap text to width of display
         textLines = self._wrap_text(message, self.width, font)
 
-        # Calculate y position to centre text on display
-        textHeight = font.getsize(message)[1]
-        yText = (self.height - textHeight) / 2
+        # Calculate total text height for all lines to centre vertically
+        totalTextHeight = len(textLines) * textHeight
+        yText = (self.height - totalTextHeight) // 2
 
         # Draw text on image
         for line in textLines:
             textWidth = font.getsize(line)[0]
-            xText = (self.width - textWidth) / 2
+            xText = (self.width - textWidth) // 2
             imgDraw.text((xText, yText), line, font=font, fill=(0, 0, 0))
-            yText += textHeight
-            
-        # textWidth, textHeight = imgDraw.textsize(message, font=font)
-        # xText = (self.width - textWidth) / 2
-        # yText = (self.height - textHeight) / 2
+            yText += textHeight  # Move y down for the next line
 
-        # imgDraw.text((xText, yText), message, font=font, fill=(0, 0, 0))
+        # Add style in bottom right corner
+        style = "Style: " + message.split("Style: ")[1].split("\n")[0]
+        styleWidth, styleHeight = imgDraw.textsize(style, font=font)
+        xStyle = self.width - styleWidth - 10
+        yStyle = self.height - styleHeight - 10
+        imgDraw.text((xStyle, yStyle), style, font=font, fill=(0, 0, 0))
 
         img.save('weather.png')
     
