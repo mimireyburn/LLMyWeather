@@ -35,6 +35,9 @@ class Visualise(object):
         # Wrap text to width of display
         textLines = self._wrap_text(message, self.width, font)
 
+        # Calculate y position to centre text on display (multi-line)
+        textHeight = font.getsize_multiline(message)[1] 
+
         # Calculate total text height for all lines to centre vertically
         totalTextHeight = len(textLines) * textHeight
         yText = (self.height - totalTextHeight) // 2
@@ -45,6 +48,13 @@ class Visualise(object):
             xText = (self.width - textWidth) // 2
             imgDraw.text((xText, yText), line, font=font, fill=(0, 0, 0))
             yText += textHeight  # Move y down for the next line
+
+
+        # textWidth, textHeight = imgDraw.textsize(message, font=font)
+        # xText = (self.width - textWidth) / 2
+        # yText = (self.height - textHeight) / 2
+
+        # imgDraw.text((xText, yText), message, font=font, fill=(0, 0, 0))
 
         # Add style in bottom right corner
         style = "Style: " + message.split("Style: ")[1].split("\n")[0]
