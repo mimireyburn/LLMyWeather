@@ -1,5 +1,6 @@
 # main.py
 from weather import Weather, OpenAI
+from visualise import Visualise
 
 WIDTH = 400
 HEIGHT = 300
