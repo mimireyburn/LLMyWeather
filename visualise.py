@@ -58,6 +58,8 @@ class Visualise(object):
         
         # Add weather logo
         logo = Image.open('weather_logo.png')
+        # Convert to RGBA
+        logo = logo.convert("RGBA")
         logo = logo.resize((50, 50))
         img.paste(logo, (self.width - 50, self.height - 50))
 
