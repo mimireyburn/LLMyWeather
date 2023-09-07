@@ -1,6 +1,12 @@
 # main.py
 from weather import Weather, OpenAI
 
+WIDTH = 400
+HEIGHT = 300
+color = "yellow"
+
+visualise = Visualise(WIDTH, HEIGHT)
+
 if __name__ == "__main__":
     # Create dict
     output = {}
@@ -22,3 +28,12 @@ if __name__ == "__main__":
     output["stylecast"] = stylecast
 
     print(stylecast)
+
+    # Render on e-ink display
+    visualise.draw(stylecast)
+    visualise.display(color)
+
+    time.sleep(60)
+
+
+
