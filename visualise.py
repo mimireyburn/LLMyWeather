@@ -58,8 +58,17 @@ class Visualise(object):
         
         # Add weather logo
         logo = Image.open('weather_logo.png')
-        # Convert to RGBA
+        # Handle transparency
         logo = logo.convert("RGBA")
+        datas = logo.getdata()
+        newData = []
+        for item in datas:
+            if item[0] == 255 and item[1] == 255 and item[2] == 255:
+                newData.append((255, 255, 255, 0))
+            else:
+                newData.append(item)
+        logo.putdata(newData)
+        # Resize logo
         logo = logo.resize((50, 50))
         img.paste(logo, (self.width - 50, self.height - 50))
 
