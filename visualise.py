@@ -9,22 +9,48 @@ class Visualise(object):
         self.width = width
         self.height = height
 
-    def draw(self, weather_statements):
-        message = ""
-        for statement in weather_statements: 
-            message = message + " \n " + str(statement)
+    # Write a function to wrap text to the specified width on InkypWHAT
+    def _wrap_text(self, text, width, font):
+        text_lines = []
+        text_line = []
+        text_words = text.split()
+        for word in text_words:
+            if font.getsize(' '.join(text_line + [word]))[0] <= width:
+                text_line.append(word)
+            else:
+                if text_line:
+                    text_lines.append(' '.join(text_line))
+                text_line = [word]
+        if text_line:
+            text_lines.append(' '.join(text_line))
+        return text_lines
+
+    def draw(self, message):
 
         font = ImageFont.truetype("AtkinsonHyperlegible-Regular.ttf", size=20)
 
         img = Image.new('RGB', (self.width, self.height), color='white')
-        
         imgDraw = ImageDraw.Draw(img)
 
-        textWidth, textHeight = imgDraw.textsize(message, font=font)
-        xText = (self.width - textWidth) / 2
+        # Wrap text to width of display
+        textLines = self._wrap_text(message, self.width, font)
+
+        # Calculate y position to centre text on display
+        textHeight = font.getsize(message)[1]
         yText = (self.height - textHeight) / 2
 
-        imgDraw.text((xText, yText), message, font=font, fill=(0, 0, 0))
+        # Draw text on image
+        for line in textLines:
+            textWidth = font.getsize(line)[0]
+            xText = (self.width - textWidth) / 2
+            imgDraw.text((xText, yText), line, font=font, fill=(0, 0, 0))
+            yText += textHeight
+            
+        # textWidth, textHeight = imgDraw.textsize(message, font=font)
+        # xText = (self.width - textWidth) / 2
+        # yText = (self.height - textHeight) / 2
+
+        # imgDraw.text((xText, yText), message, font=font, fill=(0, 0, 0))
 
         img.save('weather.png')
     
