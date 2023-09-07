@@ -49,18 +49,17 @@ class Visualise(object):
             imgDraw.text((xText, yText), line, font=font, fill=(0, 0, 0))
             yText += textHeight  # Move y down for the next line
 
-
-        # textWidth, textHeight = imgDraw.textsize(message, font=font)
-        # xText = (self.width - textWidth) / 2
-        # yText = (self.height - textHeight) / 2
-
-        # imgDraw.text((xText, yText), message, font=font, fill=(0, 0, 0))
-
-        # Add style in bottom right corner
+        # Add style in bottom right corner followed by weather logo
         styleWidth, styleHeight = imgDraw.textsize(style, font=font)
-        xStyle = self.width - styleWidth - 10
+        xStyle = self.width - styleWidth - 10 - 50
         yStyle = self.height - styleHeight - 10
+
         imgDraw.text((xStyle, yStyle), style, font=font, fill=(0, 0, 0))
+        
+        # Add weather logo
+        logo = Image.open('weather_logo.png')
+        logo = logo.resize((50, 50))
+        img.paste(logo, (self.width - 50, self.height - 50))
 
         img.save('weather.png')
     
@@ -69,8 +68,7 @@ class Visualise(object):
         inky_display.set_border(inky_display.WHITE)
         # convert image 
         current_path = os.getcwd()
-        print("filepath", current_path)
-        img = Image.open("/home/weather/WTHR/weather.png")
+        img = Image.open(current_path + "/weather.png")
 
         pal_img = Image.new("P", (1, 1))
         pal_img.putpalette((255, 255, 255, 0, 0, 0, 255, 0, 0) + (0, 0, 0) * 252)
