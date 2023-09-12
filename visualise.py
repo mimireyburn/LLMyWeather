@@ -1,6 +1,7 @@
 from PIL import Image, ImageDraw, ImageFont
 from inky import InkyWHAT
 import time
+import os
 
 class Visualise(object): 
     
@@ -8,22 +9,60 @@ class Visualise(object):
         self.width = width
         self.height = height
 
-    def draw(self, weather_statements):
-        message = ""
-        for statement in weather_statements: 
-            message = message + " \n " + str(statement)
+    # Write a function to wrap text to the specified width on InkypWHAT
+    def _wrap_text(self, text, width, font):
+        text_lines = []
+        text_line = []
+        text_words = text.split()
+        for word in text_words:
+            if font.getsize(' '.join(text_line + [word]))[0] <= (width-20):
+                text_line.append(word)
+            else:
+                if text_line:
+                    text_lines.append(' '.join(text_line))
+                text_line = [word]
+        if text_line:
+            text_lines.append(' '.join(text_line))
+        return text_lines
+
+    def draw(self, message, style):
 
         font = ImageFont.truetype("AtkinsonHyperlegible-Regular.ttf", size=20)
 
         img = Image.new('RGB', (self.width, self.height), color='white')
-        
         imgDraw = ImageDraw.Draw(img)
 
-        textWidth, textHeight = imgDraw.textsize(message, font=font)
-        xText = (self.width - textWidth) / 2
-        yText = (self.height - textHeight) / 2
+        # Wrap text to width of display
+        textLines = self._wrap_text(message, self.width, font)
 
-        imgDraw.text((xText, yText), message, font=font, fill=(0, 0, 0))
+        # Calculate y position to centre text on display (multi-line)
+        textHeight = font.getsize_multiline(message)[1] 
+
+        # Calculate total text height for all lines to centre vertically
+        totalTextHeight = len(textLines) * textHeight
+        yText = (self.height - totalTextHeight) // 2
+
+        # Draw text on image
+        for line in textLines:
+            textWidth = font.getsize(line)[0]
+            xText = (self.width - textWidth) // 2
+            imgDraw.text((xText, yText), line, font=font, fill=(0, 0, 0))
+            yText += textHeight  # Move y down for the next line
+
+        # Add style in bottom right corner followed by weather logo
+        styleWidth, styleHeight = imgDraw.textsize(style, font=font)
+        xStyle = self.width - styleWidth - 10 - 50
+        yStyle = self.height - styleHeight - 10
+
+        imgDraw.text((xStyle, yStyle), style, font=font, fill=(0, 0, 0))
+        
+        # Add weather logo
+        logo = Image.open('weather_logo.png')
+        logo = logo.resize((50, 50))
+
+        logo_bg = Image.new('RGBA', logo.size, (255, 255, 255, 255))
+        logo_with_bg = Image.alpha_composite(logo_bg, logo)
+        img.paste(logo_with_bg, (self.width - 50, self.height - 50), mask=logo_with_bg.split()[3])
 
         img.save('weather.png')
     
@@ -31,7 +70,8 @@ class Visualise(object):
         inky_display = InkyWHAT(colour)
         inky_display.set_border(inky_display.WHITE)
         # convert image 
-        img = Image.open("/home/pi/WTHR/weather.png")
+        current_path = os.getcwd()
+        img = Image.open(current_path + "/weather.png")
 
         pal_img = Image.new("P", (1, 1))
         pal_img.putpalette((255, 255, 255, 0, 0, 0, 255, 0, 0) + (0, 0, 0) * 252)
