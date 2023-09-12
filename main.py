@@ -5,6 +5,7 @@ import time
 
 WIDTH = 400
 HEIGHT = 300
+UPDATE_BUFFER = 60
 color = "yellow"
 
 visualise = Visualise(WIDTH, HEIGHT)
@@ -38,7 +39,7 @@ if __name__ == "__main__":
         visualise.draw(stylecast, style_name)
         visualise.display(color)
 
-        time.sleep(60)
+        time.sleep(60*UPDATE_BUFFER)
 
 
 
