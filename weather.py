@@ -71,6 +71,29 @@ class OpenAI:
 
         return reply
 
+    def advice_style(self, forecast):
+
+        openai.api_key = OPENAI_KEY
+
+        messages = [{"role": "system", "content":
+                     "You are a personal assistant that adapts weather reports to the user's needs. Answer as concisely as possible."}] 
+
+        message = "Deliver the following forecast concisely and help the user decide what to wear: \n" + \
+            "\n" + forecast + "\n" + "Be as concise as possible."
+
+        messages.append(
+            {"role": "user", "content": message},
+        )
+
+        chat = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo", messages=messages, max_tokens=128
+        )
+
+        reply = chat.choices[0].message.content
+        messages.append({"role": "assistant", "content": reply})
+
+        return reply
+
 
 class Weather:
     def __init__(self):

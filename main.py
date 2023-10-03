@@ -6,7 +6,8 @@ import time
 WIDTH = 400
 HEIGHT = 300
 UPDATE_BUFFER = 60
-color = "yellow"
+COLOUR = "yellow"
+SYSTEM = "assistant" # or "entertainer"
 
 visualise = Visualise(WIDTH, HEIGHT)
 
@@ -24,22 +25,27 @@ if __name__ == "__main__":
         forecast = LLM.summarise_forecast(weather_report)
         output["forecast"] = forecast
 
-        # Change style of forecast reporting with ChatGPT
-        style = weather.random_style()
-        style_name, style_desc = style[0], style[1]
-        output["style"] = style_name
-        stylecast = LLM.change_style(forecast, style_desc)
-        output["stylecast"] = stylecast
+        if SYSTEM == "assistant":
+            # Change style of forecast with ChatGPT to advise on what to wear
+            style_name = "Personal Assistant"
+            output["style"] = "Personal Assistant"
+            stylecast = LLM.advice_style(forecast)
+            output["stylecast"] = stylecast
+        
+        if SYSTEM == "entertainer":
+            # Change style of forecast reporting with ChatGPT
+            style = weather.random_style()
+            style_name, style_desc = style[0], style[1]
+            output["style"] = style_name
+            stylecast = LLM.change_style(forecast, style_desc)
+            output["stylecast"] = stylecast
 
-        print(stylecast)
+        print(output)
 
         result = style_name + ": \n" + stylecast
 
         # Render on e-ink display
         visualise.draw(stylecast, style_name)
-        visualise.display(color)
+        visualise.display(COLOUR)
 
         time.sleep(60*UPDATE_BUFFER)
-
-
-
