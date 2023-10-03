@@ -78,7 +78,7 @@ class OpenAI:
         messages = [{"role": "system", "content":
                      "You are a personal assistant that adapts weather reports to the user's needs. Answer as concisely as possible."}] 
 
-        message = "Deliver the following forecast concisely and help the user decide what to wear: \n" + \
+        message = "Deliver the following forecast concisely and always advise the user on what to wear or bring: \n" + \
             "\n" + forecast + "\n" + "Be as concise as possible."
 
         messages.append(
