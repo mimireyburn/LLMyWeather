@@ -25,6 +25,9 @@ Create a **keys.py** file based on keys_example.py. You will need:
 5. **MET Office Historical Location** (e.g. *England_SE_and_Central_S*)
 
 
+You can find the DataPoint API reference [here](https://www.metoffice.gov.uk/binaries/content/assets/metofficegovuk/pdf/data/datapoint_api_reference.pdf). To use it, register for a [free API key](https://www.metoffice.gov.uk/services/data/datapoint/api).
+
+
 ### Running on Raspberry Pi with InkyWHAT
 
 <img width="692" alt="InkyWeather" src="https://github.com/mimireyburn/LLMyWeather/assets/79009541/2e6acc9e-8c87-4baf-b760-55d5a9ab6fdc">
