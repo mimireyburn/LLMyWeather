@@ -7,7 +7,7 @@ WIDTH = 400
 HEIGHT = 300
 UPDATE_BUFFER = 60
 COLOUR = "yellow"
-SYSTEM = "assistant" # or "entertainer"
+SYSTEM = "assistant" # or "entertainer" or "none"
 
 visualise = Visualise(WIDTH, HEIGHT)
 
@@ -25,6 +25,10 @@ if __name__ == "__main__":
         forecast = LLM.summarise_forecast(weather_report)
         output["forecast"] = forecast
 
+        # Default result = forecast
+        stylecast = forecast
+        style_name = "Weather Reporter"
+
         if SYSTEM == "assistant":
             # Change style of forecast with ChatGPT to advise on what to wear
             style_name = "Personal Assistant"
@@ -40,7 +44,7 @@ if __name__ == "__main__":
             stylecast = LLM.change_style(forecast, style_desc)
             output["stylecast"] = stylecast
 
-        print(output)
+        print("SYSTEM:", system, "OUTPUT:", output)
 
         result = style_name + ": \n" + stylecast
 

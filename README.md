@@ -1,6 +1,6 @@
-# WTHR
+# LLMyWeather
 
-WTHR is an application for summarising weather data in a single sentence, using LLMs.
+LLMyWeather is an application for summarising weather data in a single sentence, using LLMs.
 
 - Pulls live data from the UK Met Office API
 - Summarises data with gpt-3.5-turbo API
@@ -13,9 +13,56 @@ WTHR is an application for summarising weather data in a single sentence, using 
 Clone the repository:
 
 ```bash
-git clone https://github.com/mimireyburn/WTHR.git
+git clone https://github.com/mimireyburn/LLMyWeather.git
 ```
 
+Create a **keys.py** file based on keys_example.py. You will need: 
+
+1. **OpenAI API Key**
+2. **MET Office DataPoint API Key**   
+3. **DataPoint Location ID** (e.g. Cambridge is *310042*)
+4. **MET Office Observed Location ID** (Not all weather stations report historical data to the API - test it first. e.g. Heathrow works and is *3772*)
+5. **MET Office Historical Location** (e.g. *England_SE_and_Central_S*)
+
+
+### Running on Raspberry Pi with InkyWHAT
+
+<img width="692" alt="InkyWeather" src="https://github.com/mimireyburn/LLMyWeather/assets/79009541/2e6acc9e-8c87-4baf-b760-55d5a9ab6fdc">
+
+At the top of the **main.py** file, change the following lines to match your setup:
+
+```python
+# Dimensions and colour of the InkyWHAT display
+WIDTH = 400
+HEIGHT = 300
+COLOUR = "yellow"
+# Frequency of display refresh in minutes
+UPDATE_BUFFER = 60
+# Define delivery style.
+SYSTEM = "assistant" # or "entertainer"
+```
+
+The *Assistant* persona acts as a PA, delivering the weather forecast with some advice on what to wear or bring with you. The *Entertainer* persona is a bit more fun, delivering the weather forecast in a random style from a list of 200+ ridiculous reporters. If unspecified, the default is *Weather Reporter*.
+
+#### Running on boot
+
+You can run the scripts on boot after you have completed the above steps. If you have renamed your user, replace 'pi' with the new username.
+
+```bash
+sudo nano /home/pi/.bashrc
+```
+
+Ensure the directories below match your setup. Add the following lines to the end of the file:
+
+```bash
+sleep 5
+echo Running at boot
+cd /home/pi/LLMyWeather
+git pull
+/usr/bin/python3 main.py
+```
+
+### Developing locally
 Install Flask, a lightweight web application framework for developing your site locally:
 
 ```bash
