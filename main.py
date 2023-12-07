@@ -12,7 +12,8 @@ SYSTEM = "assistant" # or "entertainer" or "none"
 visualise = Visualise(WIDTH, HEIGHT)
 
 if __name__ == "__main__":
-    while True:
+    run = True
+    while run == True:
         # Create dict
         output = {}
 
@@ -51,3 +52,5 @@ if __name__ == "__main__":
         # Render on e-ink display
         visualise.draw(stylecast, style_name)
         visualise.display(COLOUR)
+
+        run = False
