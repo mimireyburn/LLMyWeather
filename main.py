@@ -44,7 +44,7 @@ if __name__ == "__main__":
             stylecast = LLM.change_style(forecast, style_desc)
             output["stylecast"] = stylecast
 
-        print("SYSTEM:", system, "OUTPUT:", output)
+        print("SYSTEM:", SYSTEM, "OUTPUT:", output)
 
         result = style_name + ": \n" + stylecast
 

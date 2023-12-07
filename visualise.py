@@ -27,7 +27,7 @@ class Visualise(object):
 
     def draw(self, message, style):
 
-        font = ImageFont.truetype("AtkinsonHyperlegible-Regular.ttf", size=20)
+        font = ImageFont.truetype("static/fonts/AtkinsonHyperlegible-Regular.ttf", size=20)
 
         img = Image.new('RGB', (self.width, self.height), color='white')
         imgDraw = ImageDraw.Draw(img)
@@ -57,7 +57,7 @@ class Visualise(object):
         imgDraw.text((xStyle, yStyle), style, font=font, fill=(0, 0, 0))
         
         # Add weather logo
-        logo = Image.open('weather_logo.png')
+        logo = Image.open('static/img/weather_logo.png')
         logo = logo.resize((50, 50))
 
         logo_bg = Image.new('RGBA', logo.size, (255, 255, 255, 255))
