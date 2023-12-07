@@ -1,4 +1,4 @@
-# main.py
+#!/usr/bin/env python3
 from weather import Weather, OpenAI
 from visualise import Visualise
 import time
@@ -51,5 +51,3 @@ if __name__ == "__main__":
         # Render on e-ink display
         visualise.draw(stylecast, style_name)
         visualise.display(COLOUR)
-
-        time.sleep(60*UPDATE_BUFFER)
