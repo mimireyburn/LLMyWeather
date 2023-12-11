@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import json
 import requests
 import openai
@@ -78,7 +79,7 @@ class OpenAI:
         messages = [{"role": "system", "content":
                      "You are a personal assistant that adapts weather reports to the user's needs. Answer as concisely as possible."}] 
 
-        message = forecast + "\n" + "Summarise the above forecast in one short sentence - comparing upcoming weather to previous weather is useful if that information is avaliable. Then provide one more sentence with advice on what to wear."
+        message = forecast + "\n" + "Summarise the above forecast in one short sentence - comparing today's weather to yesterday's weather is particularly useful, if that information is avaliable. On a new line, then provide one more sentence with advice on what to wear."
 
         messages.append(
             {"role": "user", "content": message},

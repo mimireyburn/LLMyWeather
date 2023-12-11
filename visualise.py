@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from PIL import Image, ImageDraw, ImageFont
 from inky import InkyWHAT
 import time
