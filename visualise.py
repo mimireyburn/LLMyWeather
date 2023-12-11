@@ -28,7 +28,8 @@ class Visualise(object):
 
     def draw(self, message, style):
 
-        font = ImageFont.truetype("/home/weather/WTHR/static/fonts/AtkinsonHyperlegible-Regular.ttf", size=20)
+        current_path = os.getcwd()
+        font = ImageFont.truetype(current_path + "static/fonts/AtkinsonHyperlegible-Regular.ttf", size=20)
 
         img = Image.new('RGB', (self.width, self.height), color='white')
         imgDraw = ImageDraw.Draw(img)
@@ -58,21 +59,23 @@ class Visualise(object):
         imgDraw.text((xStyle, yStyle), style, font=font, fill=(0, 0, 0))
         
         # Add weather logo
-        logo = Image.open('/home/weather/WTHR/static/img/weather_logo.png')
+
+        current_path = os.getcwd()
+        logo = Image.open(current_path + 'static/img/weather_logo.png')
         logo = logo.resize((50, 50))
 
         logo_bg = Image.new('RGBA', logo.size, (255, 255, 255, 255))
         logo_with_bg = Image.alpha_composite(logo_bg, logo)
         img.paste(logo_with_bg, (self.width - 50, self.height - 50), mask=logo_with_bg.split()[3])
 
-        img.save('/home/weather/WTHR/weather.png')
+        img.save(current_path + 'weather.png')
     
     def display(self, colour):
         inky_display = InkyWHAT(colour)
         inky_display.set_border(inky_display.WHITE)
         # convert image 
         current_path = os.getcwd()
-        img = Image.open(current_path + "/WTHR/weather.png")
+        img = Image.open(current_path + "weather.png")
 
         pal_img = Image.new("P", (1, 1))
         pal_img.putpalette((255, 255, 255, 0, 0, 0, 255, 0, 0) + (0, 0, 0) * 252)

@@ -5,6 +5,7 @@ import openai
 from datetime import datetime, timedelta
 from random import choice
 import csv
+import os
 
 import keys
 
@@ -129,7 +130,9 @@ class Weather:
         result_list = []
 
         # Get params from params.json
-        with open("/home/weather/WTHR/render/params.json", "r") as f:
+
+        current_path = os.getcwd()
+        with open(current_path + "render/params.json", "r") as f:
             params = json.load(f)
 
         # Convert the parsed data into a list of strings
