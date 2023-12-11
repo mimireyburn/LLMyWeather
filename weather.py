@@ -132,7 +132,7 @@ class Weather:
         # Get params from params.json
 
         current_path = os.getcwd()
-        with open(current_path + "render/params.json", "r") as f:
+        with open(current_path + "/render/params.json", "r") as f:
             params = json.load(f)
 
         # Convert the parsed data into a list of strings
