@@ -129,7 +129,7 @@ class Weather:
         result_list = []
 
         # Get params from params.json
-        with open("render/params.json", "r") as f:
+        with open("/home/weather/WTHR/render/params.json", "r") as f:
             params = json.load(f)
 
         # Convert the parsed data into a list of strings
