@@ -6,7 +6,7 @@ LLMyWeather is an application for summarising weather data in a single sentence,
 - Summarises data with gpt-3.5-turbo API
 - Option to apply 200+ ridiculous reporter 'styles'!
 
-<img src="https://github.com/mimireyburn/LLMyWeather/assets/79009541/cb5bd7a6-c450-4b72-8a25-78584b7b6613" width="600">
+<img src="https://github.com/mimireyburn/LLMyWeather/assets/79009541/cb5bd7a6-c450-4b72-8a25-78584b7b6613" width="800">
 
 ## Usage
 
