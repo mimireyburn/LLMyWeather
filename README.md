@@ -6,7 +6,7 @@ LLMyWeather is an application for summarising weather data in a single sentence,
 - Summarises data with gpt-3.5-turbo API
 - Option to apply 200+ ridiculous reporter 'styles'!
 
-<img width="692" alt="Weather_1a" src="https://user-images.githubusercontent.com/32883278/235817723-427993ca-1077-44bf-bf9b-4f0aac88f900.png">
+<img src="https://github.com/mimireyburn/LLMyWeather/assets/79009541/cb5bd7a6-c450-4b72-8a25-78584b7b6613" width="600">
 
 ## Usage
 
@@ -47,44 +47,6 @@ SYSTEM = "assistant" # or "entertainer"
 
 The *Assistant* persona acts as a PA, delivering the weather forecast with some advice on what to wear or bring with you. The *Entertainer* persona is a bit more fun, delivering the weather forecast in a random style from a list of 200+ ridiculous reporters. If unspecified, the default is *Weather Reporter*.
 
-#### Running on boot
-
-You can run the scripts on boot after you have completed the above steps. If you have renamed your user, replace 'pi' with the new username.
-
-```bash
-sudo nano /home/pi/.bashrc
-```
-
-Ensure the directories below match your setup. Add the following lines to the end of the file:
-
-```bash
-sleep 5
-echo Running at boot
-cd /home/pi/LLMyWeather
-git pull
-/usr/bin/python3 main.py
-```
-
-### Developing locally
-Install Flask, a lightweight web application framework for developing your site locally:
-
-```bash
-pip install Flask
-```
-
-Install Requests, a Python library for making HTTP requests to the APIs.
-
-```bash
-pip install requests
-```
-
-Do not edit `static/index.html`, it will be overwritten by the dynamic generation in `app.py`.
-
-Run `app.py` to call the APIs and visualise the screen (generated using [Jinja2](https://palletsprojects.com/p/jinja/) in `templates/timeline.html`).
-
-You should be able to view the screen at `http://127.0.0.1:5000`.
-
-Edit the visualisation in `templates/base.html`. Saving the file should automatically refresh `http://127.0.0.1:5000`.
 
 ## Contributing
 
