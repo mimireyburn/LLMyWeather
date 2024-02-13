@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from weather import Weather, OpenAI
+from weather import Weather, LLM
 from visualise import Visualise
 import time
 
@@ -11,6 +11,7 @@ SYSTEM = "assistant" # or "entertainer" or "none"
 
 visualise = Visualise(WIDTH, HEIGHT)
 
+
 if __name__ == "__main__":
     run = True
     while run == True:
@@ -21,8 +22,10 @@ if __name__ == "__main__":
         weather = Weather()
         weather_report = weather.generate_report()
 
+        # print("WEATHER REPORT:", weather_report)
+
         # Summarise forecast with ChatGPT
-        LLM = OpenAI()
+        LLM = LLM()
         forecast = LLM.summarise_forecast(weather_report)
         output["forecast"] = forecast
 
@@ -32,8 +35,8 @@ if __name__ == "__main__":
 
         if SYSTEM == "assistant":
             # Change style of forecast with ChatGPT to advise on what to wear
-            style_name = "Personal Assistant"
-            output["style"] = "Personal Assistant"
+            style_name = "Inky Weather"
+            output["style"] = "Inky Weather"
             stylecast = LLM.advice_style(forecast)
             output["stylecast"] = stylecast
         
@@ -45,7 +48,7 @@ if __name__ == "__main__":
             stylecast = LLM.change_style(forecast, style_desc)
             output["stylecast"] = stylecast
 
-        print("SYSTEM:", SYSTEM, "OUTPUT:", output)
+        # print("SYSTEM:", SYSTEM, "OUTPUT:", output)
 
         result = style_name + ": \n" + stylecast
 
