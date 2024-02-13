@@ -240,7 +240,7 @@ class Weather:
     def random_style(self):
         # Function to return random (style_name, style_description) from styles.csv
 
-        with open("/files/styles.csv", "r") as f:
+        with open(current_path + "/files/styles.csv", "r") as f:
             styles = list(csv.reader(f))
         style = choice(styles)
         return style
