@@ -3,7 +3,7 @@
 LLMyWeather is an application for summarising weather data in a single sentence, using LLMs.
 
 - Pulls live data from the UK Met Office API
-- Summarises data with gpt-3.5-turbo API
+- Summarises data with gpt-4 API
 - Option to apply 200+ ridiculous reporter 'styles'!
 
 <img src="https://github.com/mimireyburn/LLMyWeather/assets/79009541/cb5bd7a6-c450-4b72-8a25-78584b7b6613" width="800">
@@ -16,7 +16,7 @@ Clone the repository:
 git clone https://github.com/mimireyburn/LLMyWeather.git
 ```
 
-Create a **keys.py** file based on keys_example.py. You will need: 
+Create a **.env** file based on env_example. You will need: 
 
 1. **OpenAI API Key**
 2. **MET Office DataPoint API Key**   
