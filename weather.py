@@ -1,22 +1,21 @@
 #!/usr/bin/env python3
 import json
 import requests
-import openai
+from openai import OpenAI
 from datetime import datetime, timedelta
 from random import choice
 import csv
 import os
 
-import keys
+import dotenv
 
-# MET OFFICE
-MET_OFFICE_API_KEY = keys.MET_OFFICE_API_KEY
-FORECAST_LOCATION = keys.FORECAST_LOCATION
-OBSERVED_LOCATION = keys.OBSERVED_LOCATION
-HISTORICAL_LOCATION = keys.HISTORICAL_LOCATION
+dotenv.load_dotenv()
 
-# OPENAI
-OPENAI_KEY = keys.OPENAI_API_KEY
+MET_OFFICE_API_KEY = os.getenv("MET_OFFICE_API_KEY")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+FORECAST_LOCATION = os.getenv("FORECAST_LOCATION")
+OBSERVED_LOCATION = os.getenv("OBSERVED_LOCATION")
+HISTORICAL_LOCATION = os.getenv("HISTORICAL_LOCATION")
 
 FORECAST_URL = "http://datapoint.metoffice.gov.uk/public/data/val/wxfcs/all/json/"
 FORECAST_RESOLUTION = "3hourly"
@@ -30,70 +29,82 @@ HISTORICAL_URL = "https://www.metoffice.gov.uk/pub/data/weather/uk/climate/datas
 HISTORICAL_DATA = f"{HISTORICAL_URL}{HISTORICAL_LOCATION}.txt"
 
 
-class OpenAI:
+class LLM:
     def __init__(self):
         pass
 
+    def call_api(self, prompt):
+        client = OpenAI()
+
+        response = client.chat.completions.create(
+            model="gpt-4",
+            messages=[
+                {
+                "role": "system",
+                "content": f"{prompt['system']}"
+                },
+                {
+                "role": "user",
+                "content": f"{prompt['user']}"
+                }
+            ],
+            temperature=1,
+            max_tokens=256,
+            top_p=1,
+            frequency_penalty=0,
+            presence_penalty=0
+        )
+
+        return response.choices[0].message.content 
+
     def summarise_forecast(self, forecast):
-        openai.api_key = OPENAI_KEY
+        system = "You are an intelligent assistant that summarises the weather forecast. Answer as concisely as possible."
+        user = forecast + "\n" + "Summarise the above forecast. Include useful information such as whether it will rain, the strength of wind and temperature. Comparing today's weather to yesterday's weather is particularly useful, if that information is avaliable."
 
-        message = forecast
-        messages = [{"role": "system", "content":
-                     "You are a intelligent assistant that gives summaries of the weather. Answer as concisely as possible."}]
-        messages.append(
-            {"role": "user", "content": message},
-        )
-        chat = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo", messages=messages, max_tokens=128
-        )
+        prompt = {
+            "system": system,
+            "user": user
+        }
 
-        reply = chat.choices[0].message.content
-        messages.append({"role": "assistant", "content": reply})
+        response = self.call_api(prompt)
 
-        return reply
+        return response
+
 
     def change_style(self, forecast, style):
+        system = "You are a funny assistant that changes the style of weather reports. You are not a weather reporter, so you don't need to be specific about the metrics, just descriptive and you can use more casual language. Answer as concisely as possible."
+        user = "Change the following to the style of " + \
+            style + ": \n" + forecast + "\n" + "Be as concise as possible. Answer in less than 200 characters."
 
-        openai.api_key = OPENAI_KEY
+        
+        prompt = {
+            "system": system,
+            "user": user
+        }
 
-        messages = [{"role": "system", "content":
-                     "You are a funny assistant that changes the style of weather reports. Answer as concisely as possible."}]
-        message = "Change the following to the style of " + \
-            style + ": \n" + forecast + "\n" + "Be as concise as possible."
+        response = self.call_api(prompt)
 
-        messages.append(
-            {"role": "user", "content": message},
-        )
-        chat = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo", messages=messages, max_tokens=128
-        )
 
-        reply = chat.choices[0].message.content
-        messages.append({"role": "assistant", "content": reply})
+        return response
 
-        return reply
 
     def advice_style(self, forecast):
 
-        openai.api_key = OPENAI_KEY
+        system = "You are a personal assistant that adapts weather reports to the user's needs. Use more casual language - you aren't a weather reporter, you're a PA. Answer very concisely and in less than 200 characters."
+        user = forecast + "\n" + "Provide your answer in the following format: 'Will it rain? <Answer> Wear a <Clothing> because <Reason>.'"
 
-        messages = [{"role": "system", "content":
-                     "You are a personal assistant that adapts weather reports to the user's needs. Answer as concisely as possible."}] 
+        prompt = {
+            "system": system,
+            "user": user
+        }
 
-        message = forecast + "\n" + "Summarise the above forecast in one short sentence - comparing today's weather to yesterday's weather is particularly useful, if that information is avaliable. On a new line, then provide one more sentence with advice on what to wear."
+        response = self.call_api(prompt)
 
-        messages.append(
-            {"role": "user", "content": message},
-        )
 
-        chat = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo", messages=messages, max_tokens=128
-        )
+        return response
 
-        reply = chat.choices[0].message.content
-        messages.append({"role": "assistant", "content": reply})
 
-        return reply
+
 
 
 class Weather:
@@ -132,7 +143,7 @@ class Weather:
         # Get params from params.json
 
         current_path = os.getcwd()
-        with open(current_path + "/render/params.json", "r") as f:
+        with open(current_path + "/params.json", "r") as f:
             params = json.load(f)
 
         # Convert the parsed data into a list of strings
@@ -222,7 +233,6 @@ class Weather:
             *observed_strings,
             "Future forecast:",
             *forecast_strings,
-            "Give a one-sentence, qualitative summary/comparison of the forecast:"
         ]
 
         return '\n'.join(prompt)
