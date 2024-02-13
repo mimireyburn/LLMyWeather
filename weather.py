@@ -143,7 +143,7 @@ class Weather:
         # Get params from params.json
 
         current_path = os.getcwd()
-        with open(current_path + "/params.json", "r") as f:
+        with open(current_path + "/files/params.json", "r") as f:
             params = json.load(f)
 
         # Convert the parsed data into a list of strings
@@ -240,7 +240,7 @@ class Weather:
     def random_style(self):
         # Function to return random (style_name, style_description) from styles.csv
 
-        with open("styles.csv", "r") as f:
+        with open("/files/styles.csv", "r") as f:
             styles = list(csv.reader(f))
         style = choice(styles)
         return style
