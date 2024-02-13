@@ -1,0 +1,94 @@
+{
+    "W": {
+       "ignore": false,
+       "unit": "",
+       "description": "Weather type",
+       "definition": {
+          "NA": "Not available",
+          "0": "Clear night",
+          "1": "Sunny day",
+          "2": "Partly cloudy (night)",
+          "3": "Partly cloudy",
+          "4": "Not used",
+          "5": "Mist",
+          "6": "Fog",
+          "7": "Cloudy",
+          "8": "Overcast",
+          "9": "Light rain shower (night)",
+          "10": "Light rain shower",
+          "11": "Drizzle",
+          "12": "Light rain",
+          "13": "Heavy rain shower (night)",
+          "14": "Heavy rain shower",
+          "15": "Heavy rain",
+          "16": "Sleet shower (night)",
+          "17": "Sleet shower",
+          "18": "Sleet",
+          "19": "Hail shower (night)",
+          "20": "Hail shower",
+          "21": "Hail",
+          "22": "Light snow shower (night)",
+          "23": "Light snow shower",
+          "24": "Light snow",
+          "25": "Heavy snow shower (night)",
+          "26": "Heavy snow shower",
+          "27": "Heavy snow",
+          "28": "Thunder shower (night)",
+          "29": "Thunder shower",
+          "30": "Thunder"
+       }
+    },
+    "T": {
+       "ignore": false,
+       "unit": "°C",
+       "description": "Temperature"
+    },
+    "F": {
+       "ignore": true,
+       "unit": "°C",
+       "description": "Feels like"
+    },
+    "Pp": {
+       "ignore": false,
+       "unit": "% precipitation",
+       "description": "Precipitation"
+    },
+    "S": {
+       "ignore": false,
+       "unit": "mph wind",
+       "description": "Wind speed"
+    },
+    "G": {
+       "ignore": true,
+       "unit": "mph gusts",
+       "description": "Gust speed"
+    },
+    "D": {
+       "ignore": true,
+       "unit": "",
+       "description": "Wind direction"
+    },
+    "H": {
+       "ignore": true,
+       "unit": "%",
+       "description": "Relative humidity"
+    },
+    "U": {
+       "ignore": true,
+       "unit": "",
+       "description": "UV",
+       "definition": {
+          "1": "Low",
+          "2": "Low",
+          "3": "Moderate",
+          "4": "Moderate",
+          "5": "Moderate",
+          "6": "High",
+          "7": "High",
+          "8": "Very high",
+          "9": "Very high",
+          "10": "Very high",
+          "11": "Extreme"
+       }
+    }
+ }
